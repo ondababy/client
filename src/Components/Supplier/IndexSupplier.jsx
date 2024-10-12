@@ -1,24 +1,24 @@
-import React, { useEffect, useState} from 'react'
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Spinner from '../Spinner';
 import { Link } from 'react-router-dom';
 import { AiOutlineEdit } from 'react-icons/ai';
 import { BsInfoCircle } from 'react-icons/bs';
 import { MdOutlineAddBox, MdOutlineDelete } from 'react-icons/md';
-import BrandsTable from './features/BrandsTable';
-import BrandsCard from './features/BrandsCard';
+import SuppliersTable from './features/SuppliersTable';
+import SuppliersCard from './features/SuppliersCard';
 
-function IndexBrand() {
-    const [brands, setBrands] = useState([]);
+function IndexSupplier() {
+    const [suppliers, setSuppliers] = useState([]); // Corrected spelling from 'supppliers' to 'suppliers'
     const [loading, setLoading] = useState(false);
     const [showType, setShowType] = useState('table');
   
     useEffect(() => {
       setLoading(true);
       axios
-        .get('http://localhost:5000/brands')
+        .get('http://localhost:5000/suppliers')
         .then((response) => {
-          setBrands(response.data.data);
+          setSuppliers(response.data.data);
           setLoading(false);
         })
         .catch((error) => {
@@ -44,20 +44,20 @@ function IndexBrand() {
           </button> */}
         </div>
         <div className='flex justify-between items-center'>
-          <h1 className='text-3xl my-8'>Brands List</h1>
-          <Link to='/brands/create'>
+          <h1 className='text-3xl my-8'>Suppliers List</h1> 
+          <Link to='/suppliers/create'>
             <MdOutlineAddBox className='text-sky-800 text-4xl' />
           </Link>
         </div>
         {loading ? (
           <Spinner />
         ) : showType === 'table' ? (
-          <BrandsTable brands={brands} />
+          <SuppliersTable suppliers={suppliers} />
         ) : (
-          <BrandsCard brands={brands} />
+          <SuppliersCard suppliers={suppliers} /> 
         )}
       </div>
     );
 }
 
-export default IndexBrand
+export default IndexSupplier;

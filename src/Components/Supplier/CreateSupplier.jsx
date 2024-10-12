@@ -1,235 +1,192 @@
-import React, { useState, useEffect } from 'react';
-import { createTheme, ThemeProvider, CssBaseline, Container, Grid, Box, Button, TextField, InputLabel } from '@mui/material';
+import React, { Fragment, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import axios from 'axios';
-// import { getToken } from '../../utils/helpers';
-import MetaData from '../MetaData';
-// import Navigation from './Navigation';
+import { Spinner } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
+const NewSupplier = () => {
 
-const validationSchema = Yup.object({
-    name: Yup.string().required('Supplier Name is required'),
-    contactNumber: Yup.string().required('Supplier contact number is required'),
-    emailAdress: Yup.string().required('Supplier email is required'),
-    images: Yup.mixed().required('Supplier image(s) is required'),
-});
-
-const defaultTheme = createTheme();
-
-const createSupplier = () => {
     const [name, setName] = useState('');
-    const [contactNumber, setcontactNumber] = useState('');
-    const [emailAddress, setemailAdress] = useState('');
-    const [images, setImages] = useState([]);
-    const [error, setError] = useState('')
-    const [imagesPreview, setImagesPreview] = useState([]);
-    const [loading, setLoading] = useState(true)
-    const [success, setSuccess] = useState('')
-    const [supplier, setSupplier] = useState({})
+    const [emailAddress, setEmailAddress] = useState('');
+    const [contactNumber, setContactNumber] = useState('');
+    // const [images, setImages] = useState([]);
+    // const [imagesPreview, setImagesPreview] = useState([]);
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [success, setSuccess] = useState('');
+    const [supplier, setSupplier] = useState({});
 
-    const formik = useFormik({
-        initialValues: {
-            name: '',
-            contactNumber: '',
-            emailAddress: '',
-            images: ''
-        },
-        validationSchema: validationSchema,
-        onSubmit: (values) => {
-            const formData = new FormData();
-            formData.set('name', values.name);
-            formData.set('contactNumber', values.contactNumber);
-            formData.set('emailAddress', values.emailAddress);
-
-            images.forEach(image => {
-                formData.append('images', image)
-            })
-
-            createSupplier(formData)
-        },
-    });
-
-    let navigate = useNavigate()
+    let navigate = useNavigate();
 
     const submitHandler = (e) => {
         e.preventDefault();
+        setLoading(true);
 
         const formData = new FormData();
         formData.set('name', name);
-        formData.set('contactNumber', contactNumber);
         formData.set('emailAddress', emailAddress);
+        formData.set('contactNumber', contactNumber);
+        // images.forEach(image => {
+        //     formData.append('images', image);
+        // });
 
-        images.forEach(image => {
-            formData.append('images', image)
-        })
+        NewSupplier(formData);
+    };
 
-        createSupplier(formData)
-    }
+    // const onChange = (e) => {
+    //     const files = Array.from(e.target.files);
+    //     setImagesPreview([]);
+    //     setImages([]);
 
-    const onChange = e => {
-        const files = Array.from(e.target.files)
-        setImagesPreview([]);
-        setImages([])
-        files.forEach(file => {
-            const reader = new FileReader();
-            reader.onload = () => {
-                if (reader.readyState === 2) {
-                    setImagesPreview(oldArray => [...oldArray, reader.result])
-                    setImages(oldArray => [...oldArray, reader.result])
-                }
-            }
+    //     files.forEach(file => {
+    //         const reader = new FileReader();
+    //         reader.onload = () => {
+    //             if (reader.readyState === 2) {
+    //                 setImagesPreview(oldArray => [...oldArray, reader.result]);
+    //                 setImages(oldArray => [...oldArray, file]);
+    //             }
+    //         };
+    //         reader.readAsDataURL(file);
+    //     });
+    // };
 
-            reader.readAsDataURL(file)
-            // console.log(reader)
-        })
-
-    }
-
-    const createSupplier = async (formData) => {
-
+    const NewSupplier = async (formData) => {
         try {
             const config = {
                 headers: {
                     'Content-Type': 'application/json',
-                    // 'Authorization': `Bearer ${getToken()}`
                 }
-            }
+            };
 
-            const { data } = await axios.post('http://localhost:5000/suppliers', formData, config)
-            setLoading(false)
-            setSuccess(data.success)
-            setSupplier(data.supplier)
+            const { data } = await axios.post('http://localhost:5000/suppliers', formData, config);
+            setLoading(false);
+            setSuccess(data.success);
+            setSupplier(data.supplier);
         } catch (error) {
-            setError(error.response.data.message)
-
+            setLoading(false);
+            setError(error.response.data.message);
         }
-    }
+    };
 
     useEffect(() => {
-
         if (error) {
             toast.error(error, {
-                position: toast.POSITION.BOTTOM_RIGHT
+                position: 'bottom-right'
             });
         }
 
         if (success) {
-            navigate('/admin/suppliers');
             toast.success('Supplier created successfully', {
-                position: toast.POSITION.BOTTOM_RIGHT
-            })
-
+                position: 'bottom-right'
+            });
+            navigate('/suppliers');
         }
-
-    }, [error, success])
-
+    }, [error, success]);
 
     return (
-        <ThemeProvider theme={defaultTheme}>
-            <MetaData title={'Add Supplier'} />
-            <Box sx={{ display: 'flex' }}>
-                <Navigation />
-                <Box
-                    component="main"
-                    sx={{
-                        backgroundColor: (theme) =>
-                            theme.palette.mode === 'light'
-                                ? theme.palette.grey[100]
-                                : theme.palette.grey[900],
-                        flexGrow: 1,
-                        height: '100vh',
-                        overflow: 'auto',
-                    }}
-                >
+        <>
+ <div className="container my-5">
+                <div className="row justify-content-center">
+                    <div className="col-lg-8 col-md-10">
+                        <div className="card shadow-lg">
+                            <div className="card-body p-5">
+                                <h2 className="text-center mb-4 text-primary">Create a New Supplier</h2>
+                                <form onSubmit={submitHandler} encType="multipart/form-data">
 
-                    <Container component="main" maxWidth="xs">
-                        <CssBaseline />
-                        <Box
-                            sx={{
-                                marginTop: 8,
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                            }}
-                        >
-                            <Box component="form" noValidate onSubmit={formik.handleSubmit} sx={{ mt: 3 }}>
-                                <Grid container spacing={2}>
-                                    <Grid item xs={12}>
-                                        <TextField
+                                    <div className="form-group mb-4">
+                                        <label htmlFor="name_field" className="text-dark">Supplier Name</label>
+                                        <input
+                                            type="text"
+                                            id="name_field"
+                                            className="form-control border border-info shadow-sm"
+                                            placeholder="Enter supplier name"
+                                            value={name}
+                                            onChange={(e) => setName(e.target.value)}
                                             required
-                                            fullWidth
-                                            label="Supplier Name"
-                                            id="name"
-                                            name="name"
-                                            autoFocus
-                                            value={formik.values.name}
-                                            onChange={formik.handleChange}
-                                            error={formik.touched.name && Boolean(formik.errors.name)}
-                                            helperText={formik.touched.name && formik.errors.name}
                                         />
-                                    </Grid>
-                                    <Grid item xs={12}>
-                                        <TextField
+                                    </div>
+
+                                    <div className="form-group mb-4">
+                                        <label htmlFor="emailAddress_field" className="text-dark">Supplier Email Address</label>
+                                        <textarea
+                                            className="form-control border border-info shadow-sm"
+                                            id="emailAddress_field"
+                                            rows="5"
+                                            placeholder="Enter supplier email address"
+                                            value={emailAddress}
+                                            onChange={(e) => setEmailAddress(e.target.value)}
                                             required
-                                            fullWidth
-                                            label="Description"
-                                            id="description"
-                                            name="description"
-                                            multiline
-                                            rows={8}
-                                            value={formik.values.description}
-                                            onChange={formik.handleChange}
-                                            error={formik.touched.description && Boolean(formik.errors.description)}
-                                            helperText={formik.touched.description && formik.errors.description}
                                         />
-                                    </Grid>
+                                    </div>
 
-                                    <Grid item xs={12}>
-                                        <InputLabel>Upload Supplier Image(s)</InputLabel>
-                                        <TextField
-                                            type='file'
-                                            name='images'
-                                            fullWidth
-                                            inputProps={{
-                                                multiple: true
-                                            }}
-                                            id='customFile'
-                                            accept="images/*"
-                                            onChange={(e) => {
-                                                formik.handleChange(e)
-                                                onChange(e)
-                                            }}
-                                            error={formik.touched.images && Boolean(formik.errors.images)}
-                                            helperText={formik.touched.images && formik.errors.images}
+                                    <div className="form-group mb-4">
+                                        <label htmlFor="contactNumber_field" className="text-dark">Supplier Contact Number</label>
+                                        <textarea
+                                            className="form-control border border-info shadow-sm"
+                                            id="contactNumber_field"
+                                            rows="5"
+                                            placeholder="Enter supplier contact number"
+                                            value={contactNumber}
+                                            onChange={(e) => setContactNumber(e.target.value)}
+                                            required
                                         />
+                                    </div>
 
-                                    </Grid>
-                                    <Grid item xs={12}>
+
+                                    {/* <div className="form-group mb-4">
+                                        <label htmlFor="customFile" className="text-dark">Upload Brand Images</label>
+                                        <div className="custom-file">
+                                            <input
+                                                type="file"
+                                                name="images"
+                                                className="custom-file-input border shadow-sm"
+                                                id="customFile"
+                                                onChange={onChange}
+                                                multiple
+                                                required
+                                            />
+                                            <label className="custom-file-label" htmlFor="customFile">
+                                                Choose Images
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div className="d-flex flex-wrap mb-4">
                                         {imagesPreview.map(img => (
-                                            <img src={img} key={img} alt="Images Preview" className="mt-3 mr-2" width="75" height="75" />
+                                            <img
+                                                src={img}
+                                                key={img}
+                                                alt="Image Preview"
+                                                className="img-thumbnail mr-2 mt-2"
+                                                width="100"
+                                                height="100"
+                                            />
                                         ))}
-                                    </Grid>
-                                </Grid>
-                                <Button
-                                    type="submit"
-                                    fullWidth
-                                    variant="contained"
-                                    sx={{ mt: 3, mb: 2 }}
-                                >
-                                    Create Supplier
-                                </Button>
-                            </Box>
-                        </Box>
-                    </Container>
+                                    </div> */}
 
-                </Box>
-            </Box>
-        </ThemeProvider>
+                                    {loading ? (
+                                        <div className="text-center">
+                                            <Spinner animation="border" role="status">
+                                                <span className="sr-only">Loading...</span>
+                                            </Spinner>
+                                        </div>
+                                    ) : (
+                                        <button type="submit" className="btn btn-info btn-block py-2 shadow">
+                                            CREATE SUPPLIER
+                                        </button>
+                                    )}
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </>
     );
 };
 
-export default createSupplier;
+export default NewSupplier;
+
+
